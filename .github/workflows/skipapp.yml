@@ -15,7 +15,10 @@ permissions:
 
 jobs:
   call-workflow:
-    uses: skiptools/actions/.github/workflows/skip-app.yml@v1
+    uses: skiptools/actions/.github/workflows/skip-app.yml@derived-sources
+    with:
+      derived-source-branch: fdroid
+      derived-source-tag-suffix: -fdroid
     secrets:
       # These optional secrets enable the Android app to be signed
       KEYSTORE_JKS: ${{ secrets.KEYSTORE_JKS }}
