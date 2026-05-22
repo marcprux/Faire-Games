@@ -777,83 +777,6 @@
         }
       }
     },
-    "GAME OVER" : {
-      "comment" : "Title shown on the game-over overlay when the player has lost the Sudoku puzzle.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "انتهت اللعبة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "SPIEL VORBEI"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "FIN DEL JUEGO"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "PARTIE TERMINÉE"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "गेम ओवर"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "GAME OVER"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "GAME OVER"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "ゲームオーバー"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "게임 오버"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "FIM DE JOGO"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "ИГРА ОКОНЧЕНА"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "游戏结束"
-          }
-        }
-      }
-    },
     "Game Over" : {
       "comment" : "Displayed in the status-bar Time pill after the player taps Give Up, replacing the running MM:SS time.",
       "localizations" : {
@@ -921,6 +844,84 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Игра окончена"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "游戏结束"
+          }
+        }
+      }
+    },
+    "GAME OVER" : {
+      "comment" : "Title shown on the game-over overlay when the player has lost the Sudoku puzzle.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "انتهت اللعبة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "SPIEL VORBEI"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "FIN DEL JUEGO"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "PARTIE TERMINÉE"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "गेम ओवर"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "GAME OVER"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "GAME OVER"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ゲームオーバー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "게임 오버"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "FIM DE JOGO"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ИГРА ОКОНЧЕНА"
           }
         },
         "zh-Hans" : {
@@ -1004,6 +1005,84 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "放弃"
+          }
+        }
+      }
+    },
+    "Highlight Mistakes" : {
+      "comment" : "Settings toggle that controls whether incorrect placements are highlighted on the board.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "تمييز الأخطاء"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Fehler hervorheben"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Resaltar errores"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mettre en évidence les erreurs"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "गलतियाँ हाइलाइट करें"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Sorot Kesalahan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Evidenzia errori"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ミスを強調表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "실수 강조 표시"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Destacar erros"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Подсвечивать ошибки"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "高亮错误"
           }
         }
       }
@@ -1235,83 +1314,6 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "提示 (∞)"
-          }
-        }
-      }
-    },
-    "Highlight Mistakes" : {
-      "comment" : "Settings toggle that controls whether incorrect placements are highlighted on the board.",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "تمييز الأخطاء"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Fehler hervorheben"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Resaltar errores"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Mettre en évidence les erreurs"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "गलतियाँ हाइलाइट करें"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Sorot Kesalahan"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Evidenzia errori"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "ミスを強調表示"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "실수 강조 표시"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Destacar erros"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Подсвечивать ошибки"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "高亮错误"
           }
         }
       }
@@ -1934,6 +1936,7 @@
     },
     "Puzzle Revealed" : {
       "comment" : "Subtitle shown beneath GAME OVER after the player taps Give Up, indicating the full solution has been revealed on the board.",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3168,12 +3171,6 @@
       "comment" : "Markdown body for the Sudoku how-to-play sheet",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "# Sudoku\n\nFill the 9×9 grid so every row, every column, and every 3×3 box contains the digits 1 through 9 exactly once.\n\n## How to play\n\n- **Tap a cell** to select it.\n- **Tap a digit** in the bottom keypad to fill the selected cell.\n- When the selected cell already contains a digit, that digit's keypad button shows a circle-slash — tap it again to clear the cell.\n- Use **notes mode** (the pencil icon) to mark candidate digits in a cell — handy for working out which numbers are still possible.\n\n## Checkpoint\n\n- Tap **Checkpoint** to start a tentative session. Every digit you place after that point is shown in a distinctive color so you can tell experiment from confirmed work.\n- The Checkpoint button then splits into **Commit** (keep the placements and clear the highlight) and **Revert** (remove every checkpoint placement and return to the state when you started the session).\n\n## Undo and Redo\n\n- Tap **Undo** to take back the most recent move. After undoing, the button splits in two so you can **Redo**.\n- Undo and redo are unlimited within the current puzzle. Making a new placement after an undo clears the redo history, and reaching the front of the timeline with Redo collapses the split button back to a single Undo.\n\n## Hints and winning\n\n- The starting clues cannot be changed.\n- The timer runs while you play. Your **best time** for each difficulty is saved.\n- Some difficulties allow **hints** — use them sparingly.\n- The puzzle is complete when every cell holds a valid digit and every row, column, and 3×3 box satisfies the no-repeat rule."
-          }
-        },
         "ar" : {
           "stringUnit" : {
             "state" : "needs_review",
@@ -3184,6 +3181,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "# Sudoku\n\nFülle ein 9×9-Gitter, sodass jede Zeile, Spalte und jedes 3×3-Kästchen die Ziffern 1 bis 9 jeweils genau einmal enthält.\n\n## So wird gespielt\n\n- **Tippe auf eine Zelle**, um sie auszuwählen.\n- **Tippe auf eine Ziffer** im unteren Tastenfeld, um die ausgewählte Zelle zu füllen.\n- Enthält die ausgewählte Zelle bereits eine Ziffer, zeigt die Taste dieser Ziffer ein durchgestrichenes Symbol – noch einmal antippen leert die Zelle.\n- Im **Notizmodus** (Stift-Symbol) markierst du Kandidatenziffern in einer Zelle.\n\n## Prüfpunkt\n\n- Tippe auf **Prüfpunkt**, um eine versuchsweise Sitzung zu starten. Jede Ziffer, die du danach setzt, erscheint in einer auffälligen Farbe.\n- Die Prüfpunkt-Taste teilt sich in **Übernehmen** (die Setzungen behalten) und **Verwerfen** (alle Setzungen entfernen und zum Zustand vor der Sitzung zurückkehren).\n\n## Rückgängig und Wiederholen\n\n- Tippe auf **Rückgängig**, um den letzten Zug zurückzunehmen. Danach teilt sich die Taste, sodass du **Wiederholen** drücken kannst.\n- Rückgängig und Wiederholen sind im aktuellen Rätsel unbegrenzt. Ein neuer Zug nach einem Rückgängig löscht den Wiederholen-Verlauf; erreicht Wiederholen das Ende, wird die Taste wieder zu einer einfachen Rückgängig-Taste.\n\n## Hinweise und Gewinnen\n\n- Vorgegebene Zahlen können nicht geändert werden.\n- Die Uhr läuft, während du spielst. Deine **beste Zeit** pro Schwierigkeit wird gespeichert.\n- Manche Schwierigkeiten erlauben **Hinweise** – nutze sie sparsam.\n- Das Rätsel ist gelöst, wenn jede Zelle eine gültige Ziffer enthält und jede Zeile, Spalte und jedes 3×3-Kästchen die Wiederholungsfreiheit erfüllt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "# Sudoku\n\nFill the 9×9 grid so every row, every column, and every 3×3 box contains the digits 1 through 9 exactly once.\n\n## How to play\n\n- **Tap a cell** to select it.\n- **Tap a digit** in the bottom keypad to fill the selected cell.\n- When the selected cell already contains a digit, that digit's keypad button shows a circle-slash — tap it again to clear the cell.\n- Use **notes mode** (the pencil icon) to mark candidate digits in a cell — handy for working out which numbers are still possible.\n\n## Checkpoint\n\n- Tap **Checkpoint** to start a tentative session. Every digit you place after that point is shown in a distinctive color so you can tell experiment from confirmed work.\n- The Checkpoint button then splits into **Commit** (keep the placements and clear the highlight) and **Revert** (remove every checkpoint placement and return to the state when you started the session).\n\n## Undo and Redo\n\n- Tap **Undo** to take back the most recent move. After undoing, the button splits in two so you can **Redo**.\n- Undo and redo are unlimited within the current puzzle. Making a new placement after an undo clears the redo history, and reaching the front of the timeline with Redo collapses the split button back to a single Undo.\n\n## Hints and winning\n\n- The starting clues cannot be changed.\n- The timer runs while you play. Your **best time** for each difficulty is saved.\n- Some difficulties allow **hints** — use them sparingly.\n- The puzzle is complete when every cell holds a valid digit and every row, column, and 3×3 box satisfies the no-repeat rule."
           }
         },
         "es" : {
@@ -3404,6 +3407,7 @@
     },
     "Too many mistakes" : {
       "comment" : "Subtitle on the game-over overlay explaining the player exceeded the mistake limit.",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
