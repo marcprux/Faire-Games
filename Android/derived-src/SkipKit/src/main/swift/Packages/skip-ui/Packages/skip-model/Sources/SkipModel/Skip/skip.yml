@@ -1,0 +1,26 @@
+# Skip configuration for SkipModel module
+
+#skip:
+#  package: 'skip.model'
+
+# the blocks to add to the settings.gradle.kts
+settings:
+  contents:
+    - block: 'dependencyResolutionManagement'
+      contents:
+        - block: 'versionCatalogs'
+          contents:
+            - block: 'create("libs")'
+              contents:
+                - 'version("androidx-compose-bom", "2026.03.01")'
+                - 'library("androidx-compose-bom", "androidx.compose", "compose-bom").versionRef("androidx-compose-bom")'
+                - 'library("androidx-compose-runtime", "androidx.compose.runtime", "runtime").withoutVersion()'
+
+# the blocks to add to the build.gradle.kts
+build:
+  contents:
+    - block: 'dependencies'
+      export: false
+      contents:
+        - 'api(platform(libs.androidx.compose.bom))'
+        - 'api(libs.androidx.compose.runtime)'

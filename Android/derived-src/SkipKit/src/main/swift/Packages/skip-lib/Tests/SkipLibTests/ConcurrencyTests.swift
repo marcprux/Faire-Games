@@ -1,0 +1,763 @@
+// Copyright 2023–2026 Skip
+// SPDX-License-Identifier: MPL-2.0
+#if !SKIP
+import Foundation
+#endif
+import Testing
+
+@Suite class ConcurrencyTests {
+    @Test func simpleValue() async throws {
+        let task1 = Task {
+            return await asyncInt()
+        }
+        let task2 = Task.detached {
+            return await self.asyncInt2()
+        }
+        let value1 = await task1.value
+        let value2 = await task2.value
+        #expect(value1 == 100)
+        #expect(value2 == 200)
+
+        let value3 = await asyncInt()
+        #expect(value3 == 100)
+    }
+
+    @Test func throwsException() async throws {
+        let task = Task {
+            let _ = await asyncInt()
+            throw ConcurrencyTestsError()
+        }
+        do {
+            let _ = try await task.value
+            #expect(!(!false)) // Should have thrown ConcurrencyTestsError
+        } catch {
+            #expect(error is ConcurrencyTestsError)
+        }
+    }
+
+    @Test func taskCancelWithException() async throws {
+        let task = Task {
+            try await Task.sleep(nanoseconds: 500_000_000)
+        }
+        try await Task.sleep(nanoseconds: 1_000_000)
+        task.cancel()
+        do {
+            let _ = try await task.value
+            #expect(!(!false)) // Expected cancellation error
+        } catch {
+            // this has been seen to fail when running against the emulator on CI:
+            // skip.lib.ConcurrencyTests > runtestTaskCancelWithException$SkipLib_debugAndroidTest[Pixel_3a_API_30(AVD) - 11] FAILED
+            #expect(error is CancellationError)
+        }
+    }
+
+    @Test func taskCancelWithoutException() async throws {
+        let task = Task {
+            var i = 0
+            while i < 10_000 {
+                guard !Task.isCancelled else { break }
+                let _ = await asyncInt() + asyncInt2()
+                i += 1
+            }
+            return i
+        }
+        let aint = await asyncInt()
+        #expect(aint == 100)
+        task.cancel()
+        let iterations = await task.value
+        #expect(iterations < 10_000)
+    }
+
+    static var taskIsCancelled = false
+
+    @Test func taskIsCancelled() async throws {
+        Self.taskIsCancelled = false
+        let task = Task {
+            defer { Self.taskIsCancelled = Task.isCancelled }
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
+        let _ = await asyncInt() + asyncInt2()
+        task.cancel()
+        do {
+            let _ = try await task.value
+            #expect(!(!false)) // Expected cancellation error
+        } catch {
+            #expect(Self.taskIsCancelled)
+        }
+
+        let task2 = Task {
+            return Task.isCancelled
+        }
+        let task2Cancelled = await task2.value
+        #expect(!task2Cancelled)
+    }
+
+    @Test func taskGroup() async throws {
+        let results = try await withThrowingTaskGroup(of: Int.self) { group in
+            group.addTask {
+                return try await self.delayedInt(millis: 200)
+            }
+            group.addTask {
+                return try await self.delayedInt(millis: 100)
+            }
+            group.addTask {
+                return try await self.delayedInt(millis: 400)
+            }
+            var results: [Int] = []
+            for try await result in group {
+                results.append(result)
+            }
+            return results
+        }
+        // Wrap in Set for CI, where order isn't the same as we see locally
+        #expect(Set(results) == Set([100, 200, 400]))
+    }
+
+    @Test func throwingTaskUncaught() async throws {
+        do {
+            let _ = try await withThrowingTaskGroup(of: Int.self) { group in
+                group.addTask {
+                    let _ = try await self.delayedInt(millis: 200)
+                    throw ConcurrencyTestsError()
+                }
+                group.addTask {
+                    return try await self.delayedInt(millis: 100)
+                }
+                group.addTask {
+                    return try await self.delayedInt(millis: 400)
+                }
+                var results: [Int] = []
+                for try await result in group {
+                    results.append(result)
+                }
+                #expect(!(!false)) // should not reach here
+                return results
+            }
+        } catch {
+            #expect(error is ConcurrencyTestsError)
+        }
+    }
+
+    @Test func throwingTaskGroupCaught() async throws {
+        var caught: Error? = nil
+        let results = try await withThrowingTaskGroup(of: Int.self) { group in
+            group.addTask {
+                let _ = try await self.delayedInt(millis: 200)
+                throw ConcurrencyTestsError()
+            }
+            group.addTask {
+                return try await self.delayedInt(millis: 100)
+            }
+            group.addTask {
+                return try await self.delayedInt(millis: 400)
+            }
+            var results: [Int] = []
+            do {
+                for try await result in group {
+                    results.append(result)
+                }
+            } catch {
+                caught = error
+            }
+            for try await result in group {
+                results.append(result)
+            }
+            return results
+        }
+        #expect(caught is ConcurrencyTestsError)
+        #expect(results.count == 2)
+    }
+
+    @Test func throwingTaskGroupWaitForAllPropagatesThrow() async throws {
+        do {
+            let _ = try await withThrowingTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    try await Task.sleep(nanoseconds: 10_000_000)
+                }
+                group.addTask {
+                    try await Task.sleep(nanoseconds: 5_000_000)
+                    throw ConcurrencyTestsError()
+                }
+                try await group.waitForAll()
+                #expect(!(!false)) // waitForAll should have thrown
+            }
+            #expect(!(!false)) // Should have thrown ConcurrencyTestsError
+        } catch {
+            #expect(error is ConcurrencyTestsError)
+        }
+    }
+
+    @Test func taskGroupCancel() async throws {
+        // skip: Failing in CI
+        return
+//        let result = try await withThrowingTaskGroup(of: Int.self) { group in
+//            group.addTask {
+//                return try await self.delayedInt(millis: 200)
+//            }
+//            group.addTask {
+//                return try await self.delayedInt(millis: 100)
+//            }
+//            group.addTask {
+//                return try await self.delayedInt(millis: 400)
+//            }
+//            let result = try await group.next()
+//            XCTAssertNotNil(result)
+//            group.cancelAll()
+//            XCTAssertTrue(group.isCancelled)
+//            do {
+//                let _ = try await group.next()
+//                XCTFail()
+//            } catch is CancellationError {
+//            }
+//            return result ?? 0
+//        }
+//        XCTAssertNotEqual(result, 0)
+    }
+
+    @Test func asyncLet() async throws {
+        let start = currentTimeMillis()
+        async let i1 = delayedInt(millis: 500)
+        async let i2 = delayedInt(millis: 200)
+        let sum = try await i1 + i2
+        let end = currentTimeMillis()
+        #expect(700 == sum)
+        // note that the timing assertion has been observed to fail under high load on both the Android emulator and iOS simulator; this is not unexpected
+        //XCTAssertLessThan(end - start, 700)
+    }
+
+    @Test func asyncSequence() async throws {
+        let seq = AsyncIntSequence()
+        var collected: [Int] = []
+        for await i in seq {
+            collected.append(i)
+        }
+        #expect(collected == [0, 100, 200])
+
+        collected.removeAll()
+        let mapped = seq.map { $0 * -1 }
+        for await i in mapped {
+            collected.append(i)
+        }
+        #expect(collected == [0, -100, -200])
+
+        collected.removeAll()
+        let compactMapped = seq.compactMap { $0 == 100 ? nil : $0 }
+        for await i in compactMapped {
+            collected.append(i)
+        }
+        #expect(collected == [0, 200])
+
+        collected.removeAll()
+        let flatMapped = seq.flatMap { _ in AsyncIntSequence() }
+        for await i in flatMapped {
+            collected.append(i)
+        }
+        #expect(collected == [0, 100, 200, 0, 100, 200, 0, 100, 200])
+
+        collected.removeAll()
+        let filtered = seq.filter { $0 == 100 }
+        for await i in filtered {
+            collected.append(i)
+        }
+        #expect(collected == [100])
+
+        let first = await seq.first { $0 == 100 }
+        #expect(first == 100)
+
+        collected.removeAll()
+        let dropped = seq.dropFirst()
+        for await i in dropped {
+            collected.append(i)
+        }
+        #expect(collected == [100, 200])
+
+        collected.removeAll()
+        let droppedAll = seq.dropFirst(10)
+        for await i in droppedAll {
+            collected.append(i)
+        }
+        #expect(collected == Array<Int>())
+
+        collected.removeAll()
+        let dropped2 = seq.drop { $0 != 100 }
+        for await i in dropped2 {
+            collected.append(i)
+        }
+        #expect(collected == [100, 200])
+
+        collected.removeAll()
+        let prefix = seq.prefix(2)
+        for await i in prefix {
+            collected.append(i)
+        }
+        #expect(collected == [0, 100])
+
+        collected.removeAll()
+        let prefixAll = seq.prefix(10)
+        for await i in prefixAll {
+            collected.append(i)
+        }
+        #expect(collected == [0, 100, 200])
+
+        let min = await seq.min()
+        #expect(min == 0)
+        let min2 = await seq.min(by: >)
+        #expect(min2 == 200)
+
+        let max = await seq.max()
+        #expect(max == 200)
+        let max2 = await seq.max(by: >)
+        #expect(max2 == 0)
+
+        let contains = await seq.contains(100)
+        #expect(contains)
+        let contains2 = await seq.contains(300)
+        #expect(!contains2)
+        let contains3 = await seq.contains { $0 == 100 }
+        #expect(contains3)
+        let contains4 = await seq.contains { $0 == 300 }
+        #expect(!contains4)
+
+        let allSatisfy = await seq.allSatisfy { $0 >= 0 }
+        #expect(allSatisfy)
+        let allSatisfy2 = await seq.allSatisfy { $0 < 200 }
+        #expect(!allSatisfy2)
+
+        let reduce = await seq.reduce(0, +)
+        #expect(reduce == 300)
+        var result = 0
+        let reduce2 = await seq.reduce(into: result) { $0 += $1 }
+        #expect(reduce2 == 300)
+    }
+
+    @Test func asyncStream() async throws {
+        let (stream, continuation) = AsyncStream.makeStream(of: Int.self)
+        continuation.yield(100)
+        continuation.yield(200)
+        continuation.finish()
+        try await assertEqual(stream: stream, content: [100, 200])
+
+        let (stream2, continuation2) = AsyncStream.makeStream(of: Int.self)
+        Task {
+            await continuation2.yield(asyncInt())
+            await continuation2.yield(asyncInt2())
+            continuation2.finish()
+        }
+        try await assertEqual(stream: stream2, content: [100, 200])
+
+        var i = 0
+        let stream3 = AsyncStream<Int>(unfolding: {
+            i += 1
+            if i == 1 {
+                return await self.asyncInt()
+            } else if i == 2 {
+                return await self.asyncInt2()
+            } else {
+                return nil
+            }
+        })
+        try await assertEqual(stream: stream3, content: [100, 200])
+
+        #if SKIP
+        let stream4 = AsyncStream(Int.self) { continuation in
+            continuation.yield(100)
+            continuation.yield(200)
+            continuation.finish()
+        }
+        var flow = stream4.kotlin()
+        var c = 0
+        flow.collect { value in
+            if c == 0 {
+                #expect(value == 100)
+            } else if c == 1 {
+                #expect(value == 200)
+            }
+            c += 1
+        }
+        #expect(c == 2)
+
+        i = 0
+        let stream5 = AsyncStream<Int>(unfolding: {
+            i += 1
+            if i == 1 {
+                return await self.asyncInt()
+            } else if i == 2 {
+                return await self.asyncInt2()
+            } else {
+                return nil
+            }
+        })
+        flow = stream5.kotlin()
+        c = 0
+        flow.collect { value in
+            if c == 0 {
+                #expect(value == 100)
+            } else if c == 1 {
+                #expect(value == 200)
+            }
+            c += 1
+        }
+        #expect(c == 2)
+
+        flow = kotlinx.coroutines.flow.flowOf(10, 20, 30)
+        let stream6 = AsyncStream<Int>(flow: flow)
+        try await assertEqual(stream: stream6, content: [10, 20, 30])
+        #endif
+    }
+
+    private func assertEqual(stream: AsyncStream<Int>, content: [Int]) async throws {
+        var i = 0
+        for await value in stream {
+            if i < content.count {
+                #expect(value == content[i])
+            }
+            i += 1
+        }
+        #expect(i == content.count)
+    }
+
+    @Test func asyncThrowingStream() async throws {
+        let (stream, continuation) = AsyncThrowingStream.makeStream(of: Int.self)
+        continuation.yield(100)
+        continuation.yield(200)
+        continuation.finish()
+        try await assertEqual(stream: stream, content: [100, 200], shouldThrow: false)
+
+        let (stream2, continuation2) = AsyncThrowingStream.makeStream(of: Int.self)
+        Task {
+            await continuation2.yield(asyncInt())
+            await continuation2.yield(asyncInt2())
+            continuation2.finish(throwing: ConcurrencyTestsError())
+        }
+        try await assertEqual(stream: stream2, content: [100, 200], shouldThrow: true)
+
+        var i = 0
+        let stream3 = AsyncThrowingStream<Int, Error>(unfolding: {
+            i += 1
+            if i == 1 {
+                return await self.asyncInt()
+            } else if i == 2 {
+                return await self.asyncInt2()
+            } else {
+                throw ConcurrencyTestsError()
+            }
+        })
+        try await assertEqual(stream: stream3, content: [100, 200], shouldThrow: true)
+
+        #if SKIP
+        let stream4 = AsyncThrowingStream(Int.self) { continuation in
+            continuation.yield(100)
+            continuation.yield(200)
+            continuation.finish(throwing: ConcurrencyTestsError())
+        }
+        var flow = stream4.kotlin()
+        var c = 0
+        do {
+            flow.collect { value in
+                if c == 0 {
+                    #expect(value == 100)
+                } else if c == 1 {
+                    #expect(value == 200)
+                }
+                c += 1
+            }
+            #expect(!(!false)) // Should have thrown
+        } catch {
+        }
+        #expect(c == 2)
+
+        i = 0
+        let stream5 = AsyncStream<Int>(unfolding: {
+            i += 1
+            if i == 1 {
+                return await self.asyncInt()
+            } else if i == 2 {
+                return await self.asyncInt2()
+            } else {
+                throw ConcurrencyTestsError()
+            }
+        })
+        flow = stream5.kotlin()
+        c = 0
+        do {
+            flow.collect { value in
+                if c == 0 {
+                    #expect(value == 100)
+                } else if c == 1 {
+                    #expect(value == 200)
+                }
+                c += 1
+            }
+            #expect(!(!false)) // Should have thrown
+        } catch {
+        }
+        #expect(c == 2)
+
+        flow = kotlinx.coroutines.flow.flowOf(10, 20, 30)
+        let stream6 = AsyncThrowingStream<Int, Error>(flow: flow)
+        try await assertEqual(stream: stream6, content: [10, 20, 30], shouldThrow: false)
+        #endif
+    }
+
+    private func assertEqual(stream: AsyncThrowingStream<Int, Error>, content: [Int], shouldThrow: Bool) async throws {
+        var i = 0
+        do {
+            for try await value in stream {
+                if i < content.count {
+                    #expect(value == content[i])
+                }
+                i += 1
+            }
+            if shouldThrow {
+                #expect(!(!false)) // Should have thrown
+            }
+        } catch {
+            #expect(shouldThrow)
+        }
+        #expect(i == content.count)
+    }
+
+    @Test func mainActor() async throws {
+        mainActorCount = 0
+        let task1 = Task.detached {
+            var numbers: Set<Int> = []
+            for _ in 0..<100 {
+                await numbers.insert(self.mainActorIncrement())
+            }
+            return numbers
+        }
+        let task2 = Task.detached {
+            var numbers: Set<Int> = []
+            for _ in 0..<100 {
+                await numbers.insert(self.mainActorIncrement())
+            }
+            return numbers
+        }
+        let task3 = Task.detached {
+            var numbers: Set<Int> = []
+            for _ in 0..<100 {
+                await numbers.insert(self.mainActorIncrement())
+            }
+            return numbers
+        }
+        let set1 = await task1.value
+        let set2 = await task2.value
+        let set3 = await task3.value
+
+        // @MainActor should have forced exclusive access and prevented races
+        let combined = set1.union(set2).union(set3)
+        #expect(300 == combined.count)
+    }
+
+    var mainActorCount = 0
+
+    @MainActor func mainActorIncrement() -> Int {
+        mainActorCount += 1
+        return mainActorCount
+    }
+
+    func currentTimeMillis() -> Int {
+        // We're below the level of SkipFoundation, so we don't have access to the transpiled Date API
+        #if SKIP
+        return Int(java.lang.System.currentTimeMillis())
+        #else
+        return Int(Date.now.timeIntervalSince1970 * 1000)
+        #endif
+    }
+
+    func delayedInt(millis: Int) async throws -> Int {
+        try await Task.sleep(nanoseconds: UInt64(1_000_000 * millis))
+        return millis
+    }
+
+    func asyncInt() async -> Int {
+        return 100
+    }
+
+    func asyncInt2() async -> Int {
+        return 200
+    }
+
+    @Test func checkedContinuation() async throws {
+        let i1 = await withCheckedContinuation(function: "testWithCheckedContinuation") { continuation in
+            continuation.resume(returning: 100)
+        }
+
+        #expect(100 == i1)
+
+        let i2 = await withCheckedContinuation(function: "testWithCheckedContinuation") { continuation in
+            Task.detached {
+                continuation.resume(returning: 101)
+            }
+        }
+
+        #expect(101 == i2)
+
+        let i3 = await withCheckedContinuation(function: "testWithCheckedContinuation") { continuation in
+            Task.detached {
+                Task {
+                    Task.detached {
+                        continuation.resume(returning: await self.asyncInt() + self.asyncInt2())
+                    }
+                }
+            }
+        }
+
+        #expect(300 == i3)
+    }
+
+    // MARK: - Duration Tests
+
+    // Helper to access Duration components cross-platform.
+    // On native Swift, Duration.seconds/attoseconds properties require macOS 15+,
+    // but Duration.components is available from macOS 13+.
+    // On Skip, the custom Duration type has direct seconds/attoseconds properties.
+    func secs(_ d: Duration) -> Int64 {
+        #if SKIP
+        return d.seconds
+        #else
+        return d.components.seconds
+        #endif
+    }
+    func attos(_ d: Duration) -> Int64 {
+        #if SKIP
+        return d.attoseconds
+        #else
+        return d.components.attoseconds
+        #endif
+    }
+
+    @Test func durationSeconds() {
+        let d = Duration.seconds(3)
+        #expect(secs(d) == 3)
+        #expect(attos(d) == 0)
+    }
+
+    @Test func durationMilliseconds() {
+        let d = Duration.milliseconds(1500)
+        #expect(secs(d) == 1)
+        #expect(attos(d) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationMicroseconds() {
+        let d = Duration.microseconds(2_500_000)
+        #expect(secs(d) == 2)
+        #expect(attos(d) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationNanoseconds() {
+        let d = Duration.nanoseconds(1_500_000_000)
+        #expect(secs(d) == 1)
+        #expect(attos(d) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationSecondsDouble() {
+        let d = Duration.seconds(2.5)
+        #expect(secs(d) == 2)
+        #expect(attos(d) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationZero() {
+        let d = Duration.zero
+        #expect(secs(d) == 0)
+        #expect(attos(d) == 0)
+    }
+
+    @Test func durationComparison() {
+        let a = Duration.seconds(1)
+        let b = Duration.seconds(2)
+        let c = Duration.milliseconds(1500)
+        #expect(a < b)
+        #expect(c < b)
+        #expect(a < c)
+        #expect(!(b < a))
+    }
+
+    @Test func durationAddition() {
+        let a = Duration.seconds(1)
+        let b = Duration.milliseconds(500)
+        let sum = a + b
+        #expect(secs(sum) == 1)
+        #expect(attos(sum) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationSubtraction() {
+        let a = Duration.seconds(2)
+        let b = Duration.milliseconds(500)
+        let diff = a - b
+        #expect(secs(diff) == 1)
+        #expect(attos(diff) == 500_000_000_000_000_000)
+    }
+
+    @Test func durationMultiplication() {
+        let d = Duration.seconds(2)
+        let result = d * 3
+        #expect(secs(result) == 6)
+        #expect(attos(result) == 0)
+    }
+
+    @Test func durationDivision() {
+        let d = Duration.seconds(6)
+        let result = d / 3
+        #expect(secs(result) == 2)
+        #expect(attos(result) == 0)
+    }
+
+    @Test func taskSleepForDuration() async throws {
+        let start = currentTimeMillis()
+        try await Task.sleep(for: .milliseconds(100))
+        let elapsed = currentTimeMillis() - start
+        // Should have slept for at least 80ms (allowing for timer imprecision)
+        #expect(elapsed >= 80)
+        // Should not have slept for more than 5000ms
+        #expect(elapsed < 5000)
+    }
+
+    @Test func taskSleepForSeconds() async throws {
+        let start = currentTimeMillis()
+        try await Task.sleep(for: .seconds(0.1))
+        let elapsed = currentTimeMillis() - start
+        #expect(elapsed >= 80)
+        #expect(elapsed < 5000)
+    }
+
+    @Test func checkedThrowingContinuation() async throws {
+        do {
+            let x: Int = try await withCheckedThrowingContinuation(function: "testWithCheckedThrowingContinuation") { continuation in
+                Task.detached {
+                    continuation.resume(throwing: ConcurrencyTestsError())
+                }
+            }
+            #expect(!(!false)) // should have thrown an error
+        } catch _ as ConcurrencyTestsError {
+            // success
+        } catch {
+            #expect(!(!false)) // wrong error thrown
+        }
+    }
+}
+
+struct ConcurrencyTestsError: Error {
+}
+
+struct AsyncIntSequence: AsyncSequence {
+    typealias AsyncIterator = Iterator
+    typealias Element = Int
+
+    func makeAsyncIterator() -> Iterator {
+        return Iterator()
+    }
+
+    class Iterator: AsyncIteratorProtocol {
+        var iterations = 0
+
+        func next() async -> Int? {
+            guard iterations < 3 else {
+                return nil
+            }
+            let result = iterations * 100
+            iterations += 1
+            return result
+        }
+    }
+}
