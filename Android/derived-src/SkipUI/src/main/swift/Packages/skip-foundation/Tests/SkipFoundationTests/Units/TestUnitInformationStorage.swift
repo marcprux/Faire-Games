@@ -1,0 +1,45 @@
+// Copyright 2023–2026 Skip
+// SPDX-License-Identifier: MPL-2.0
+import Foundation
+import XCTest
+
+// These tests are adapted from https://github.com/apple/swift-corelibs-foundation/blob/main/Tests/Foundation/Tests which have the following license:
+
+
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2019 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See http://swift.org/LICENSE.txt for license information
+// See http://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+
+class TestUnitInformationStorage: XCTestCase {
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    func testUnitInformationStorage() {
+        let bits = Measurement(value: 8, unit: UnitInformationStorage.bits)
+        XCTAssertEqual(
+            bits.converted(to: UnitInformationStorage.bytes).value,
+            1,
+            "Conversion from bits to bytes"
+        )
+        XCTAssertEqual(
+            bits.converted(to: UnitInformationStorage.nibbles).value,
+            2,
+            "Conversion from bits to nibbles"
+        )
+        XCTAssertEqual(
+            bits.converted(to: UnitInformationStorage.yottabits).value,
+            8.0e-24,
+            accuracy: 1.0e-27,
+            "Conversion from bits to yottabits"
+        )
+        XCTAssertEqual(
+            bits.converted(to: UnitInformationStorage.gibibits).value,
+            7.450581e-09,
+            accuracy: 1.0e-12,
+            "Conversion from bits to gibibits"
+        )
+    }
+}
