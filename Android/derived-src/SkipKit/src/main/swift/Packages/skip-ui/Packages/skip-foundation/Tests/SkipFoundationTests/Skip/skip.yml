@@ -1,0 +1,15 @@
+# Skip configuration for SkipFoundationTests module
+
+skip:
+  resources:
+    - path: 'Resources'
+      mode: 'process'
+    - path: 'ResourcesCopy'
+      mode: 'copy'
+
+# the blocks to add to the build.gradle.kts
+#build:
+#  contents:
+#    - block: 'dependencies'
+#      contents:
+#        - '// no new dependencies in SkipFoundationKtTests'

@@ -1,0 +1,13 @@
+# Configuration file for Skip (https://skip.dev) project
+skip:
+  mode: 'transpiled'
+  bridging: true
+
+# Kotlin dependencies and Gradle build options for this module can be configured here
+build:
+  contents:
+    - block: 'dependencies'
+      export: false
+      contents:
+        - 'implementation("androidx.biometric:biometric:1.1.0")'
+        - 'implementation("androidx.browser:browser:1.10.0")'
